@@ -1,0 +1,24 @@
+name = "ddns-asus-cloudflared"
+main = "src/worker.js"
+compatibility_date = "2024-08-22"
+workers_dev = true
+node_compat = true
+# tail_consumers = [{service = "workers-logs"}] # need paid plan
+
+kv_namespaces = [
+	{ binding = "DDNS_STORE", id = "" }
+]
+
+[vars]
+ROUTER_MAC = ""
+ROUTER_WPS = ""
+DDNS_DOMAIN = ".asuscomm.com"
+
+CLOUDFLARE_API_TOKEN = ""
+CLOUDFLARE_ACCOUNT_ID = "2e7817f378e6c476a31c9252d58381b6"
+CLOUDFLARE_CONNECTOR_ID = "39458975-82e3-4c44-b8ad-b2aed604957e"
+
+NOTIFY_TOKEN = ""
+
+[env.dev.triggers]
+crons = ["2 * * * *"]
