@@ -18,7 +18,7 @@ export default {
 	},
 
 	async fetch(event, env, ctx) {
-		await doSomeTaskOnASchedule(env);
+		// await doSomeTaskOnASchedule(env);
 
 		const limiter = new RateLimiter(1, 30, env.DDNS_STORE);
 		const key = 'limiter:test';
