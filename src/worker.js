@@ -9,6 +9,7 @@
  */
 import cloudflared from "./cloudflared";
 import asuscomm from "./asuscomm";
+import {RateLimiter} from "./rate-limiter";
 
 // Export a default object containing scheduled handlers
 export default {
@@ -17,8 +18,19 @@ export default {
 	},
 
 	async fetch(event, env, ctx) {
-		ctx.waitUntil(doSomeTaskOnASchedule(env));
-		return new Response({status: "ok."})
+		// ctx.waitUntil(doSomeTaskOnASchedule(env));
+
+		const limiter = new RateLimiter(1, 30, env.DDNS_STORE);
+		const key = 'limiter:test';
+
+		if (await limiter.tryRemoveToken(key)) {
+			console.log('Action allowed');
+			return Response.json({status: "Action allowed"})
+		} else {
+
+			console.log('Rate limit exceeded');
+			return Response.json({status: "Rate limit exceeded"})
+		}
 	}
 };
 
