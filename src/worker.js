@@ -57,9 +57,11 @@ async function doSomeTaskOnASchedule(env) {
 		return
 	}
 
-	// 3.5 如果不一样 检查上次该ip的上次更新时间，如果间隔时间太短，也不要更新（improve）
-	if (!await asuscomm.fuse(connector_ip, env.DDNS_STORE)) {
-		console.log("The request was fused, SKIP UPDATE")
+	// 3.5 如果不一样 对更新的IP 实施限流，避免重复更新 (30 min)
+	const limiter = new RateLimiter(1, 30 * 60, env.DDNS_STORE);
+	const key = `limiter:ip:${connector_ip}`;
+	if (!await limiter.tryRemoveToken(key)) {
+		console.log("The request was updated, SKIP UPDATE")
 	}
 
 
