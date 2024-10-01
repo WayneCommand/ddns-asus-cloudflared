@@ -1,11 +1,21 @@
 class Cloudflared {
 
+	accountId: string;
+	apiKey: string;
+	notifyKey: string;
+
+	constructor(options: CloudflaredOptions) {
+		this.accountId = options.accountId;
+		this.apiKey = options.apiKey;
+		this.notifyKey = options.notifyKey;
+	}
+
 	/**
 	 * 解析域名的IP
 	 * @param domian		     域名
 	 * @returns {Promise<*>}	IP
 	 */
-	async resolve(domian) {
+	async resolve(domian: string): Promise<string> {
 		let response = await fetch(`https://cloudflare-dns.com/dns-query?name=${domian}&type=A`, {
 			method: "GET",
 			headers: {
@@ -18,23 +28,23 @@ class Cloudflared {
 		// this is dns resolved ip
 		if (body.Answer && body.Answer.length > 0) {
             return body.Answer[0].data;
-        }
+        } else {
+			return "";
+		}
 	}
 
 
 	/**
 	 * 获取连接器客户端的原始IP
-	 * @param accountId			账户ID
 	 * @param connectorId		连接器ID
-	 * @param apiKey			API KEY
 	 * @returns {Promise<*>}	IP
 	 */
-	async connectorIP(accountId, connectorId, apiKey) {
-		let response = await fetch(`https://api.cloudflare.com/client/v4/accounts/${accountId}/cfd_tunnel/${connectorId}`, {
+	async connectorIP(connectorId: string): Promise<string> {
+		let response = await fetch(`https://api.cloudflare.com/client/v4/accounts/${this.accountId}/cfd_tunnel/${connectorId}`, {
 			method: "GET",
             headers: {
 				'accept': `application/json`,
-				"Authorization": `Bearer ${apiKey}`
+				"Authorization": `Bearer ${this.apiKey}`
             }
 		})
 
@@ -44,25 +54,34 @@ class Cloudflared {
 			let conn = body.result.connections
 			// 取最新（最后一个）的原始ip
 			return conn[conn.length - 1].origin_ip;
+		}else {
+			return "";
 		}
 	}
 
-	async notification(ip, token) {
+	async notification(ip: string): Promise<void> {
 		await fetch('https://notify.waynecommand.com/wechat', {
 			method: 'POST',
 			headers: {
 				'Content-Type': 'application/json',
-				'Authorization': 'Bearer ' + token
+				'Authorization': 'Bearer ' + this.notifyKey
 			},
 			body: JSON.stringify({
 				title: 'DDNS 更新成功',
 				content: 'DDNS 更新成功: ' + ip
 			})
 		})
+		console.log("notify push success.")
 	}
 
 }
 
-const cloudflared = new Cloudflared();
+type CloudflaredOptions = {
+	accountId: string,
+	apiKey: string,
+	notifyKey: string
+}
 
-export default cloudflared;
+export {
+	Cloudflared
+}

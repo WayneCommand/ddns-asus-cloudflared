@@ -7,8 +7,8 @@
  *
  * Learn more at https://developers.cloudflare.com/workers/
  */
-import cloudflared from "./cloudflared";
-import asuscomm from "./asuscomm";
+import {Cloudflared} from "./cloudflared";
+import {AsusComm} from "./asuscomm";
 import {RateLimiter} from "./rate-limiter";
 
 // Export a default object containing scheduled handlers
@@ -18,7 +18,7 @@ export default {
 	},
 
 	async fetch(event, env, ctx) {
-		// ctx.waitUntil(doSomeTaskOnASchedule(env));
+		await doSomeTaskOnASchedule(env);
 
 		const limiter = new RateLimiter(1, 30, env.DDNS_STORE);
 		const key = 'limiter:test';
@@ -36,6 +36,17 @@ export default {
 
 
 async function doSomeTaskOnASchedule(env) {
+	const asuscomm = new AsusComm({
+		mac: env.ROUTER_MAC,
+		wps: env.ROUTER_WPS
+	});
+	const cloudflared = new Cloudflared({
+		accountId: env.CLOUDFLARE_ACCOUNT_ID,
+		apiKey: env.CLOUDFLARE_API_TOKEN,
+		notifyKey: env.NOTIFY_TOKEN
+	})
+	const limiter = new RateLimiter(1, 30 * 60, env.DDNS_STORE);
+
 	// 1. 获取 ddns 的ipc
 	let current_ddns_ip = await cloudflared.resolve(env.DDNS_DOMAIN);
 	console.log("current ddns ip: " + current_ddns_ip);
@@ -44,7 +55,7 @@ async function doSomeTaskOnASchedule(env) {
 		return
 	}
 	// 2. 获取cloudflared client ip
-	let connector_ip = await cloudflared.connectorIP(env.CLOUDFLARE_ACCOUNT_ID, env.CLOUDFLARE_CONNECTOR_ID, env.CLOUDFLARE_API_TOKEN);
+	let connector_ip = await cloudflared.connectorIP(env.CLOUDFLARE_CONNECTOR_ID);
 	console.log("current connector ip: " + connector_ip);
 	if (!connector_ip) {
 		console.error("IP INVALID, ABORT.")
@@ -58,22 +69,15 @@ async function doSomeTaskOnASchedule(env) {
 	}
 
 	// 3.5 如果不一样 对更新的IP 实施限流，避免重复更新 (30 min)
-	const limiter = new RateLimiter(1, 30 * 60, env.DDNS_STORE);
 	const key = `limiter:ip:${connector_ip}`;
 	if (!await limiter.tryRemoveToken(key)) {
 		console.log("The request was updated, SKIP UPDATE")
 	}
 
-
 	// 4. 更新 ddns 的ip
-	await asuscomm.update(env.DDNS_DOMAIN, connector_ip, {
-		MAC: env.ROUTER_MAC,
-		WPS: env.ROUTER_WPS
-	});
+	await asuscomm.update(env.DDNS_DOMAIN, connector_ip);
 
 	// 5. 发送通知给我
-	await cloudflared.notification(connector_ip, env.NOTIFY_TOKEN);
-
-	console.log("notify push success.")
+	await cloudflared.notification(connector_ip);
 }
 
