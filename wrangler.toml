@@ -3,7 +3,6 @@ main = "src/worker.js"
 compatibility_date = "2024-08-22"
 workers_dev = true
 node_compat = true
-# tail_consumers = [{service = "workers-logs"}] # need paid plan
 
 kv_namespaces = [
 	{ binding = "DDNS_STORE", id = "be83a5b1c6c942299f0b1e1d9c8cd561" }
@@ -20,9 +19,10 @@ CLOUDFLARE_CONNECTOR_ID = ""
 
 NOTIFY_TOKEN = ""
 
-[env.dev.triggers]
-crons = ["2 * * * *"]
-
-
+# Workers Logs billing will begin on November 1, 2024.
 [observability]
 enabled = true
+
+# Dev Settings
+[env.dev.triggers]
+crons = ["2 * * * *"]
