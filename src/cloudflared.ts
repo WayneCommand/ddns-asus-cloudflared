@@ -36,11 +36,11 @@ class Cloudflared {
 
 	/**
 	 * 获取连接器客户端的原始IP
-	 * @param connectorId		连接器ID
+	 * @param tunnelId		通道
 	 * @returns {Promise<*>}	IP
 	 */
-	async connectorIP(connectorId: string): Promise<string> {
-		let response = await fetch(`https://api.cloudflare.com/client/v4/accounts/${this.accountId}/cfd_tunnel/${connectorId}`, {
+	async connectorIP(tunnelId: string): Promise<string> {
+		let response = await fetch(`https://api.cloudflare.com/client/v4/accounts/${this.accountId}/cfd_tunnel/${tunnelId}`, {
 			method: "GET",
             headers: {
 				'accept': `application/json`,

@@ -55,7 +55,7 @@ async function doSomeTaskOnASchedule(env) {
 		return
 	}
 	// 2. 获取cloudflared client ip
-	let connector_ip = await cloudflared.connectorIP(env.CLOUDFLARE_CONNECTOR_ID);
+	let connector_ip = await cloudflared.connectorIP(env.CLOUDFLARE_TUNNEL_ID);
 	console.log("current connector ip: " + connector_ip);
 	if (!connector_ip) {
 		console.error("IP INVALID, ABORT.")
