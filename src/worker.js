@@ -72,6 +72,7 @@ async function doSomeTaskOnASchedule(env) {
 	const key = `limiter:ip:${connector_ip}`;
 	if (!await limiter.tryRemoveToken(key)) {
 		console.log("The request was updated, SKIP UPDATE")
+		return
 	}
 
 	// 4. 更新 ddns 的ip
