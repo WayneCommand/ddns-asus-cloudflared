@@ -27,7 +27,7 @@ class AsusComm {
 			}
 		});
 
-		console.log(response);
+		console.log(`AsusComm Resp: ${JSON.stringify(response)}`);
 	}
 
 	async reg(accountId, connectorId, apiKey) {
@@ -64,7 +64,7 @@ function password(domain: string, ip: string, wps: string): string {
 function basicAuth(user: string, password: string): string {
 	let auth = 'Basic ' + Buffer.from(`${user}:${password}`).toString('base64');
 
-	console.log(auth);
+	console.log(`http auth: ${auth}`);
 	return auth;
 }
 
