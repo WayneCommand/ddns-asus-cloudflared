@@ -1,5 +1,11 @@
 # DDNS updator on cloudflared and asuscomm
 
+## ⚠️ Archiving attention!
+
+> CN: 因为本地运营商的监管要求和华硕DDNS的服务即将关闭，使用这种方法已经没有意义了，所以这个项目不再维护。
+
+Because of the local ISP and ASUS DDNS services closing down, this way is outdated and not recommended. so this project is no longer maintained.
+
 ## AsusComm
 
 ```shell
